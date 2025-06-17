@@ -1,45 +1,95 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import mysql.connector
+from mysql.connector import Error
 
 app = Flask(__name__)
-CORS(app)
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",  # Change as needed
-    database="ecommerce_db"
-)
-cursor = db.cursor()
+# MySQL database config - update these with your credentials
+db_config = {
+    'host': 'localhost',
+    'user': 'your_mysql_user',
+    'password': 'your_mysql_password',
+    'database': 'your_db_name'
+}
 
-def create_tables():
-    cursor.execute("CREATE TABLE IF NOT EXISTS shoes (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), price FLOAT)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS watches (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), price FLOAT)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS paintings (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), price FLOAT)")
+def get_db_connection():
+    conn = mysql.connector.connect(**db_config)
+    return conn
 
-create_tables()
+def get_table(category):
+    if category == 'shoes':
+        return 'shoes'
+    elif category == 'watches':
+        return 'watches'
+    elif category == 'paintings':
+        return 'paintings'
+    else:
+        return None
 
-@app.route('/add/<item>', methods=['POST'])
-def add_item(item):
-    data = request.json
+@app.route('/add/<category>', methods=['POST'])
+def add_item(category):
+    table = get_table(category)
+    if not table:
+        return jsonify({'error': 'Invalid category'}), 400
+
+    data = request.get_json()
     name = data.get('name')
     price = data.get('price')
-    cursor.execute(f"INSERT INTO {item} (name, price) VALUES (%s, %s)", (name, price))
-    db.commit()
-    return jsonify({"message": f"{item} added"}), 201
 
-@app.route('/get/<item>', methods=['GET'])
-def get_items(item):
-    cursor.execute(f"SELECT * FROM {item}")
-    result = cursor.fetchall()
-    return jsonify(result)
+    if not name or price is None:
+        return jsonify({'error': 'Name and price are required'}), 400
 
-@app.route('/delete/<item>/<int:item_id>', methods=['DELETE'])
-def delete_item(item, item_id):
-    cursor.execute(f"DELETE FROM {item} WHERE id = %s", (item_id,))
-    db.commit()
-    return jsonify({"message": f"{item} deleted"}), 200
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"INSERT INTO {table} (name, price) VALUES (%s, %s)", (name, price))
+        conn.commit()
+        item_id = cursor.lastrowid
+        cursor.close()
+        conn.close()
+        return jsonify({'id': item_id, 'name': name, 'price': price}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get/<category>', methods=['GET'])
+def get_items(category):
+    table = get_table(category)
+    if not table:
+        return jsonify({'error': 'Invalid category'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT id, name, price FROM {table}")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        data = [[row[0], row[1], float(row[2])] for row in rows]
+        return jsonify(data)
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/delete/<category>/<int:item_id>', methods=['DELETE'])
+def delete_item(category, item_id):
+    table = get_table(category)
+    if not table:
+        return jsonify({'error': 'Invalid category'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"DELETE FROM {table} WHERE id = %s", (item_id,))
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        conn.close()
+
+        if affected == 0:
+            return jsonify({'error': 'Item not found'}), 404
+        return jsonify({'status': 'deleted'}), 200
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
