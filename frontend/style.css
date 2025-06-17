@@ -1,0 +1,27 @@
+body {
+    font-family: Arial;
+    text-align: center;
+}
+.header-img {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+}
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+.btn-container div {
+    text-align: center;
+}
+.btn-container img {
+    width: 100px;
+    height: 100px;
+}
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 16px;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paintings Selling Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Welcome to Paintings Selling Page</h2>
+    <input type="text" id="name" placeholder="Enter Name"><br><br>
+    <input type="number" id="price" placeholder="Enter Price"><br><br>
+    <button onclick="addItem()">Add</button>
+    <h3>List</h3>
+    <ul id="list"></ul>
+
+<script>
+const endpoint = "paintings";
+function loadItems() {
+    fetch('http://localhost:5000/get/' + endpoint)
+    .then(res => res.json())
+    .then(data => {
+        let list = document.getElementById('list');
+        list.innerHTML = '';
+        data.forEach(([id, name, price]) => {
+            list.innerHTML += `<li>${name} - ${price}
+                <button onclick="deleteItem(${id})">Delete</button></li>`;
+        });
+    });
+}
+
+function addItem() {
+    let name = document.getElementById('name').value;
+    let price = document.getElementById('price').value;
+    fetch('http://localhost:5000/add/' + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, price })
+    }).then(() => loadItems());
+}
+
+function deleteItem(id) {
+    fetch('http://localhost:5000/delete/' + endpoint + '/' + id, {
+        method: 'DELETE'
+    }).then(() => loadItems());
+}
+
+window.onload = loadItems;
+</script>
+</body>
+</html>
