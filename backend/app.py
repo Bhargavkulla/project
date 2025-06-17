@@ -7,9 +7,9 @@ app = Flask(__name__)
 # MySQL database config - update these with your credentials
 db_config = {
     'host': 'localhost',
-    'user': 'your_mysql_user',
-    'password': 'your_mysql_password',
-    'database': 'your_db_name'
+    'user': 'admin',
+    'password': 'admin',
+    'database': 'bhargav'
 }
 
 def get_db_connection():
