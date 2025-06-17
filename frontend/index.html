@@ -2,24 +2,45 @@
 <html>
 <head>
     <title>Bhargav E-commerce Store</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #add8e6; /* light blue */
+            margin-top: 50px;
+        }
+        h1 {
+            margin-bottom: 40px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        #shoes-btn { background-color: #ff69b4; }   /* hot pink */
+        #watches-btn { background-color: #ff8c00; } /* dark orange */
+        #paintings-btn { background-color: #32cd32; } /* lime green */
+    </style>
 </head>
 <body>
-    <img src="ecommerce.jpg" alt="E-commerce" class="header-img">
     <h1>Bhargav E-commerce Store</h1>
     <div class="btn-container">
-        <div onclick="location.href='shoes.html'">
-            <img src="shoe.jpg" alt="Shoes"><br>
-            <button>Shoes</button>
-        </div>
-        <div onclick="location.href='watches.html'">
-            <img src="watch.jpg" alt="Watches"><br>
-            <button>Watches</button>
-        </div>
-        <div onclick="location.href='paintings.html'">
-            <img src="painting.jpg" alt="Paintings"><br>
-            <button>Paintings</button>
-        </div>
+        <button id="shoes-btn" onclick="location.href='shoes.html'">Shoes</button>
+        <button id="watches-btn" onclick="location.href='watches.html'">Watches</button>
+        <button id="paintings-btn" onclick="location.href='paintings.html'">Paintings</button>
     </div>
 </body>
 </html>
